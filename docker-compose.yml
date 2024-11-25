@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: dynamic-nginx:latest  # 替换为你构建的镜像名
+    container_name: nginx-proxy
+    ports:
+      - "80:80"   # 映射 HTTP 端口
+      - "443:443" # 映射 HTTPS 端口
+    environment:
+      # 动态配置环境变量
+      PROXY_PASS: "http://example.com:3000" # 代理目标地址
+      LISTEN_PORT: 80                      # 监听端口
+      SERVER_NAME: "mydomain.com"          # 配置域名
+      ENABLE_SSL: "true"                   # 是否启用 HTTPS
+      SSL_CERT_PATH: "/etc/nginx/certs/cert.pem" # 证书路径
+      SSL_KEY_PATH: "/etc/nginx/certs/key.pem"   # 密钥路径
+    volumes:
+      - ./certs:/etc/nginx/certs:ro # 挂载本地证书目录，确保证书可用
+    restart: unless-stopped         # 自动重启策略
+
+  # 这里可以添加其他被代理的服务，例如：
+  app:
+    image: your-application-image:latest
+    container_name: app-service
+    ports:
+      - "3000:3000" # 仅供调试使用
+    environment:
+      - ENV_VAR=value # 应用的环境变量
